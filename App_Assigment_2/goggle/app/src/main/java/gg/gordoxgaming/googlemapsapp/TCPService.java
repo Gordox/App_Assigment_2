@@ -67,6 +67,16 @@ public class TCPService extends Service{
                 dataOutStream = new DataOutputStream(outStream);
                 dataOutStream.flush();
 
+                while(running){
+                    try{
+                        String result = dataInStream.readUTF();
+
+
+                    }catch (IOException e) {
+
+                    }
+                }
+
 
 
             } catch (Exception e) {
