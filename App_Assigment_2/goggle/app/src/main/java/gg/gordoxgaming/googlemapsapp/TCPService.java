@@ -20,9 +20,9 @@ public class TCPService extends Service{
     private static final String IP = "195.178.227.53";
     public static final int CONNECTION_TIMEOUT = 5000;
 
+
+    private ThreadManager inThread, outThread;
     private Socket socket;
-    public InputStream inStream;
-    public OutputStream outStream;
     public DataInputStream dataInStream;
     public DataOutputStream dataOutStream;
     private volatile boolean running = false;
@@ -38,55 +38,59 @@ public class TCPService extends Service{
         return null;
     }
 
-    public void run(){
+    public void run() {
 
-        if(running)
+        if (running)
             return;
 
         running = true;
         socket = new Socket();
+        inThread = new ThreadManager();
+        outThread = new ThreadManager();
+
+        outThread.start();
+        outThread.addTask(new Runnable() {
+            @Override
+            public void run() {
+                try {
+
+                    Log.e("TCP Client", "C: Connecting...");
+
+                    socket.connect(new InetSocketAddress(InetAddress.getByName(IP), PORT), CONNECTION_TIMEOUT);
+
+                    dataInStream = new DataInputStream(socket.getInputStream());
+                    dataOutStream = new DataOutputStream(socket.getOutputStream());
+                    dataOutStream.flush();
+
+                    Log.e("TCP Client", "C: Connected");
 
 
+                    inThread.start();
+                    inThread.addTask(new Runnable() {
+                        @Override
+                        public void run() {
 
-        try {
+                                while (running) {
+                                    try {
+                                        String result = dataInStream.readUTF();
 
-            //InetAddress serverAddress = InetAddress.getByName(IP);
+                                        // get the json response from server here
 
-            Log.e("TCP Client", "C: Connecting...");
+                                        //Fix it like i have it in my RTS game server
+                                            //Method that take in the response type here
 
-            socket.connect(new InetSocketAddress(InetAddress.getByName(IP), PORT), CONNECTION_TIMEOUT);
+                                    } catch (IOException e) {
+                                        Log.e("TCP", "S: Error Other", e);
+                                    }
 
-            Log.e("TCP Client", "C: Connected");
-
-            try {
-
-                inStream = socket.getInputStream();
-                outStream = socket.getOutputStream();
-
-                dataInStream = new DataInputStream(inStream);
-                dataOutStream = new DataOutputStream(outStream);
-                dataOutStream.flush();
-
-                while(running){
-                    try{
-                        String result = dataInStream.readUTF();
-
-
-                    }catch (IOException e) {
-
-                    }
+                                }
+                        }
+                    });
+                } catch (Exception e) {
+                    Log.e("TCP", "C: Error Socket", e);
                 }
-
-
-
-            } catch (Exception e) {
-                Log.e("TCP", "S: Error Other", e);
             }
-
-
-        } catch (Exception e) {
-            Log.e("TCP", "C: Error Socket", e);
-        }
+        });
     }
 
     public void disconnect(){
@@ -95,34 +99,35 @@ public class TCPService extends Service{
             return;
         }
 
-        Log.e("Command", "DISCONNECTING");
-        try {
-            if(socket != null){
-                socket.close();
-                socket = null;
-            }
-            if(dataOutStream != null){
-                dataOutStream.close();
-                dataOutStream = null;
-            }
-            if(dataInStream != null){
-                dataInStream.close();
-                dataInStream = null;
-            }
-            if(outStream != null){
-                outStream.close();
-                outStream = null;
-            }
-            if(inStream != null){
-                inStream.close();
-                inStream = null;
+        Log.e("Command", "Disconnecting");
+        outThread.addTask(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    if (socket != null) {
+                        socket.close();
+                        socket = null;
+                    }
+                    if (dataOutStream != null) {
+                        dataOutStream.close();
+                        dataOutStream = null;
+                    }
+                    if (dataInStream != null) {
+                        dataInStream.close();
+                        dataInStream = null;
+                    }
+
+                    outThread.stop();
+                    inThread.stop();
+
+                    running = false;
+
+                } catch (IOException e) {
+                        e.printStackTrace();
+                }
             }
 
-            running = false;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        });
     }
-
 
 }

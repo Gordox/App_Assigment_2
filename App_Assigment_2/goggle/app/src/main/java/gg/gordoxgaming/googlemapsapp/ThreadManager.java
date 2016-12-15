@@ -24,9 +24,37 @@ public class ThreadManager {
         }
     }
 
+    private class TaskWorker extends Thread {
+        public void run() {
+            Runnable runnable;
+            while (taskWorker != null) {
+                try {
+                    runnable = tasks.get();
+                    runnable.run();
+                } catch (InterruptedException e) {
+                    taskWorker = null;
+                }
+            }
+        }
+    }
+
     private Buffer<Runnable> tasks = new Buffer<>();
+    private TaskWorker taskWorker;
 
 
+    void start() {
+        if(taskWorker ==null) {
+            taskWorker = new TaskWorker();
+            taskWorker.start();
+        }
+    }
+
+    void stop() {
+        if(taskWorker !=null) {
+            taskWorker.interrupt();
+            taskWorker =null;
+        }
+    }
 
 
 
@@ -34,14 +62,6 @@ public class ThreadManager {
         tasks.put(runnable);
     }
 
-
-
-
-    private class myThread extends Thread{
-        public void run(){
-
-        }
-    }
 
 
 }
