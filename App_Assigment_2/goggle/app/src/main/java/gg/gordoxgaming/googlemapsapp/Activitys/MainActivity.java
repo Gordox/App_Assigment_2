@@ -1,4 +1,4 @@
-package gg.gordoxgaming.googlemapsapp;
+package gg.gordoxgaming.googlemapsapp.Activitys;
 
 import android.app.FragmentManager;
 import android.os.AsyncTask;
@@ -21,6 +21,9 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+
+import gg.gordoxgaming.googlemapsapp.R;
+import gg.gordoxgaming.googlemapsapp.Net.TCPService;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback {

@@ -1,7 +1,9 @@
-package gg.gordoxgaming.googlemapsapp;
+package gg.gordoxgaming.googlemapsapp.Activitys;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+
+import gg.gordoxgaming.googlemapsapp.R;
 
 public class LoginActivity extends AppCompatActivity {
 

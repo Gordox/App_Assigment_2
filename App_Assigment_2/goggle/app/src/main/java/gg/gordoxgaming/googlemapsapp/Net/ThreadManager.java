@@ -1,4 +1,4 @@
-package gg.gordoxgaming.googlemapsapp;
+package gg.gordoxgaming.googlemapsapp.Net;
 
 import java.util.LinkedList;
 

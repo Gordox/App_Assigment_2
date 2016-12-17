@@ -1,4 +1,4 @@
-package gg.gordoxgaming.googlemapsapp;
+package gg.gordoxgaming.googlemapsapp.Net;
 
 import android.app.Service;
 import android.content.Intent;
@@ -6,10 +6,14 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import org.json.JSONObject;
+
 import java.io.*;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+
+
 
 /**
  * Created by Gordox on 2016-10-25.
@@ -45,6 +49,7 @@ public class TCPService extends Service{
 
         running = true;
         socket = new Socket();
+
         inThread = new ThreadManager();
         outThread = new ThreadManager();
 
@@ -72,15 +77,19 @@ public class TCPService extends Service{
 
                                 while (running) {
                                     try {
+
                                         String result = dataInStream.readUTF();
+                                        JSONObject obj = new JSONObject(result);
 
-                                        // get the json response from server here
+                                        Log.e("Server", "C: Message received: " + obj.toString());
 
-                                        //Fix it like i have it in my RTS game server
-                                            //Method that take in the response type here
+                                        TypeCommand(obj);
 
                                     } catch (IOException e) {
                                         Log.e("TCP", "S: Error Other", e);
+                                    }catch (Exception e) {
+                                        Log.e("TCP Client Thread error", e.getClass().toString());
+                                        Log.e("TCP Client Thread error", e.getMessage());
                                     }
 
                                 }
@@ -88,6 +97,7 @@ public class TCPService extends Service{
                     });
                 } catch (Exception e) {
                     Log.e("TCP", "C: Error Socket", e);
+                    disconnect();
                 }
             }
         });
@@ -129,5 +139,36 @@ public class TCPService extends Service{
 
         });
     }
+
+    public void SendToServer(final String message){
+        if(!running)
+            return;
+
+        outThread.addTask(new Runnable() {
+            @Override
+            public void run() {
+                try{
+                    dataOutStream.writeUTF(message);
+                    dataOutStream.flush();
+                }catch (IOException e){
+                    Log.e("TCP Client", e.getMessage());
+                }
+            }
+        });
+    }
+
+    private void TypeCommand(JSONObject obj){
+
+        switch (obj.toString()){
+            case "location:":
+                break;
+            case "groups:":
+                break;
+            case "register:":
+                break;
+        }
+
+    }
+
 
 }
